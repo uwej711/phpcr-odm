@@ -680,4 +680,23 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('stringAssocKeys', $class->mappings['stringAssoc']['assoc']);
         $this->assertEquals('stringAssocNulls', $class->mappings['stringAssoc']['assocNulls']);
     }
+
+    /**
+     * @depends testLoadUuidMapping
+     * @param   $class
+     */
+    public function testUuidMapping($class)
+    {
+        $this->assertTrue(isset($class->uuidFieldName));
+        $this->assertEquals('uuid', $class->uuidFieldName);
+        $this->assertEquals('string', $class->mappings['uuid']['type']);
+        $this->assertEquals('jcr:uuid', $class->mappings['uuid']['property']);
+    }
+
+    public function testLoadUuidMapping()
+    {
+        $className = 'Doctrine\Tests\ODM\PHPCR\Mapping\Model\UuidMappingObject';
+
+        return $this->loadMetadataForClassname($className);
+    }
 }
