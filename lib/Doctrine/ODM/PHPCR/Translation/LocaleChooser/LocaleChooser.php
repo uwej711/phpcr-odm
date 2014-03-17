@@ -156,7 +156,7 @@ class LocaleChooser implements LocaleChooserInterface
      *      for each locale
      * @param string $defaultLocale the default locale to be used if locale is not set
      */
-    public function setLocalePreferencesAndDefaultLocale($localePreference, $defaultLocale)
+    public function setLocalePreferenceAndDefaultLocale($localePreference, $defaultLocale)
     {
         $this->defaultLocale = $defaultLocale;
         $this->setLocalePreference($localePreference);
