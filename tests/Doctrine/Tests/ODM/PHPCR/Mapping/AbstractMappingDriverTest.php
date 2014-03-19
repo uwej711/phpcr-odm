@@ -678,5 +678,6 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($class->mappings['stringAssoc']['translated']);
         $this->assertTrue($class->mappings['stringAssoc']['multivalue']);
         $this->assertEquals('stringAssocKeys', $class->mappings['stringAssoc']['assoc']);
+        $this->assertEquals('stringAssocNulls', $class->mappings['stringAssoc']['assocNulls']);
     }
 }
