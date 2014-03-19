@@ -316,7 +316,11 @@ class UnitOfWork
             if (isset($properties[$mapping['property']])) {
                 if (true === $mapping['multivalue']) {
                     if (isset($mapping['assoc']) && isset($properties[$mapping['assoc']])) {
-                        $documentState[$fieldName] = array_combine((array) $properties[$mapping['assoc']], (array) $properties[$mapping['property']]);
+                        $documentState[$fieldName] = $this->createAssoc(
+                            $properties[$mapping['assoc']],
+                            $properties[$mapping['property']],
+                            $properties[$mapping['assocNulls']]
+                        );
                     } else {
                         $documentState[$fieldName] = (array) $properties[$mapping['property']];
                     }
@@ -2028,8 +2032,10 @@ class UnitOfWork
                     if ($mapping['multivalue'] && $fieldValue) {
                         $fieldValue = (array) $fieldValue;
                         if (isset($mapping['assoc'])) {
-                            $node->setProperty($mapping['assoc'], array_keys($fieldValue), PropertyType::STRING);
-                            $fieldValue = array_values($fieldValue);
+                            $prepared = $this->processAssoc($fieldValue);
+                            $node->setProperty($mapping['assoc'], $prepared['keys'], PropertyType::STRING);
+                            $node->setProperty($mapping['assocNulls'], $prepared['nulls'], PropertyType::STRING);
+                            $fieldValue = $prepared['values'];
                         }
                     }
 
@@ -2154,9 +2160,10 @@ class UnitOfWork
                     if ($mapping['multivalue']) {
                         $value = empty($fieldValue) ? null : ($fieldValue instanceof Collection ? $fieldValue->toArray() : $fieldValue);
                         if ($value && isset($mapping['assoc'])) {
-                            $node->setProperty($mapping['assoc'], array_keys($value), PropertyType::STRING);
-                            $value = array_values($value);
-                        }
+                            $prepared = $this->processAssoc($value);
+                            $node->setProperty($mapping['assoc'], $prepared['keys'], PropertyType::STRING);
+                            $node->setProperty($mapping['assocNulls'], $prepared['nulls'], PropertyType::STRING);
+                            $value = $prepared['values'];                        }
                     } else {
                         $value = $fieldValue;
                     }
@@ -3231,4 +3238,42 @@ class UnitOfWork
     {
         return $this->scheduledRemovals;
     }
+
+    /**
+     * Process null values in an associative array so that they can be stored in phpcr.
+     *
+     * Returns an array containing three entries for keys (all), values (null repaced by '<null>'),
+     * and keys of null values
+     *
+     * @param array $assoc
+     * @return array
+     */
+    protected function processAssoc(array $assoc)
+    {
+        $keys = array_keys($assoc);
+        $values = array_values(array_map(function ($item) { return null === $item ? '<null>' : $item; }, $assoc));
+        $nulls = array_keys(array_filter($assoc, function ($item) { return null === $item; }));
+
+        return array('keys' => $keys, 'values' => $values, 'nulls' => $nulls);
+    }
+
+    /**
+     * Combine keys, values and null values back in an associative array
+     *
+     * @param array $keys keys of the original array
+     * @param array $values values to be used
+     * @param array $nulls keys originally null values
+     * @return array
+     */
+    protected function createAssoc(array $keys, array $values, array $nulls)
+    {
+        $result = array_combine($keys, $values);
+        foreach ($result as $key => $value) {
+            if ('<null>' === $value && in_array($key, $nulls)) {
+                $result[$key] = null;
+            }
+        }
+        return $result;
+    }
+
 }
