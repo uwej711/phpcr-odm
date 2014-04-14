@@ -62,8 +62,6 @@ abstract class SourceFactory extends AbstractNode
      */
     public function joinInner()
     {
-        throw new BadMethodCallException(__METHOD__.' not supported yet');
-
         return $this->addChild(new SourceJoin($this,
             QOMConstants::JCR_JOIN_TYPE_INNER
         ));
