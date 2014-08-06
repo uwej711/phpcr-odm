@@ -15,7 +15,8 @@
         "php": ">=5.3.3",
         "doctrine/common": "~2.4.0",
         "phpcr/phpcr-implementation": "~2.1.0",
-        "phpcr/phpcr-utils": "~1.0.0"
+        "phpcr/phpcr-utils": "~1.0.0",
+        "doctrine/instantiator": "1.0.*"
     },
     "require-dev": {
         "symfony/yaml": "~2.0",
